@@ -183,7 +183,7 @@ export class GitOperations {
       resolvedPath,
       async () => {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
-        
+
         // Handle each file individually to avoid path issues
         for (const file of files) {
           await CommandExecutor.executeGitCommand(
@@ -215,14 +215,14 @@ export class GitOperations {
       resolvedPath,
       async () => {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
-        
+
         // Verify there are staged changes
         const statusResult = await CommandExecutor.executeGitCommand(
           'status --porcelain',
           context.operation,
           repoPath
         );
-        
+
         if (!statusResult.stdout.trim()) {
           return {
             content: [{
@@ -232,6 +232,17 @@ export class GitOperations {
             isError: true
           };
         }
+
+        const userName = await CommandExecutor.executeGitCommand(
+          `config --local user.name "${process.env.COMMIT_NAME}"`,
+          context.operation,
+          repoPath
+        );
+        const userEmail = await CommandExecutor.executeGitCommand(
+          `config --local user.email "${process.env.COMMIT_EMAIL}"`,
+          context.operation,
+          repoPath
+        );
 
         const result = await CommandExecutor.executeGitCommand(
           `commit -m "${message}"`,
@@ -263,7 +274,7 @@ export class GitOperations {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
         await RepositoryValidator.validateRemoteConfig(repoPath, remote, context.operation);
         await RepositoryValidator.validateBranchExists(repoPath, branch, context.operation);
-        
+
         const result = await CommandExecutor.executeGitCommand(
           `push ${remote} ${branch}${force ? ' --force' : ''}${noVerify ? ' --no-verify' : ''}${tags ? ' --tags' : ''}`,
           context.operation,
@@ -309,10 +320,10 @@ export class GitOperations {
                 break;
               }
               case 'push': {
-                const pushResult = await this.push({ 
-                  path: repoPath, 
-                  remote: action.remote, 
-                  branch: action.branch 
+                const pushResult = await this.push({
+                  path: repoPath,
+                  remote: action.remote,
+                  branch: action.branch
                 }, context);
                 results.push(pushResult.content[0].text);
                 break;
@@ -349,7 +360,7 @@ export class GitOperations {
       async () => {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
         await RepositoryValidator.validateRemoteConfig(repoPath, remote, context.operation);
-        
+
         const result = await CommandExecutor.executeGitCommand(
           `pull ${remote} ${branch}`,
           context.operation,
@@ -407,7 +418,7 @@ export class GitOperations {
       async () => {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
         PathValidator.validateBranchName(name);
-        
+
         const result = await CommandExecutor.executeGitCommand(
           `checkout -b ${name}${force ? ' --force' : ''}${track ? ' --track' : ' --no-track'}${setUpstream ? ' --set-upstream' : ''}`,
           context.operation,
@@ -438,7 +449,7 @@ export class GitOperations {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
         PathValidator.validateBranchName(name);
         await RepositoryValidator.validateBranchExists(repoPath, name, context.operation);
-        
+
         const currentBranch = await RepositoryValidator.getCurrentBranch(repoPath, context.operation);
         if (currentBranch === name) {
           throw ErrorHandler.handleValidationError(
@@ -446,7 +457,7 @@ export class GitOperations {
             { operation: context.operation, path: repoPath }
           );
         }
-        
+
         const result = await CommandExecutor.executeGitCommand(
           `branch -D ${name}`,
           context.operation,
@@ -476,7 +487,7 @@ export class GitOperations {
       async () => {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
         await RepositoryValidator.ensureClean(repoPath, context.operation);
-        
+
         const result = await CommandExecutor.executeGitCommand(
           `checkout ${target}`,
           context.operation,
@@ -535,7 +546,7 @@ export class GitOperations {
       async () => {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
         PathValidator.validateTagName(name);
-        
+
         let command = `tag ${name}`;
         if (typeof message === 'string' && message.length > 0) {
           command = `tag -a ${name} -m "${message}"`;
@@ -571,7 +582,7 @@ export class GitOperations {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
         PathValidator.validateTagName(name);
         await RepositoryValidator.validateTagExists(repoPath, name, context.operation);
-        
+
         const result = await CommandExecutor.executeGitCommand(
           `tag -d ${name}`,
           context.operation,
@@ -637,7 +648,7 @@ export class GitOperations {
           );
         }
         PathValidator.validateRemoteUrl(url);
-        
+
         const result = await CommandExecutor.executeGitCommand(
           `remote add ${name} ${url}`,
           context.operation,
@@ -667,7 +678,7 @@ export class GitOperations {
       async () => {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
         PathValidator.validateRemoteName(name);
-        
+
         const result = await CommandExecutor.executeGitCommand(
           `remote remove ${name}`,
           context.operation,
