@@ -184,10 +184,19 @@ export class GitOperations {
       async () => {
         const { path: repoPath } = PathValidator.validateGitRepo(resolvedPath);
 
-        // Handle each file individually to avoid path issues
-        for (const file of files) {
+        if (files && files.length > 0) {
+          // Handle each file individually to avoid path issues
+          for (const file of files) {
+            await CommandExecutor.executeGitCommand(
+              `add "${file}"`,
+              context.operation,
+              repoPath
+            );
+          }
+        } else {
+          // Add all files if no specific files are provided
           await CommandExecutor.executeGitCommand(
-            `add "${file}"`,
+            'add .',
             context.operation,
             repoPath
           );

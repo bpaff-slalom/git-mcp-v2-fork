@@ -56,7 +56,7 @@ export interface AddOptions extends GitOptions, BasePathOptions {
    * Array of absolute paths to files to stage
    * Example: /Users/username/projects/my-repo/src/file.js
    */
-  files: string[];
+  files?: string[];
 }
 
 export interface CommitOptions extends GitOptions, BasePathOptions {
@@ -143,51 +143,51 @@ export function isInitOptions(obj: any): obj is InitOptions {
 }
 
 export function isCloneOptions(obj: any): obj is CloneOptions {
-  return obj && 
+  return obj &&
     typeof obj.url === 'string' &&
     validatePath(obj.path);
 }
 
 export function isAddOptions(obj: any): obj is AddOptions {
-  return obj && 
-    validatePath(obj.path) && 
+  return obj &&
+    validatePath(obj.path) &&
     Array.isArray(obj.files) &&
     obj.files.every((f: any) => typeof f === 'string' && isAbsolutePath(f));
 }
 
 export function isCommitOptions(obj: any): obj is CommitOptions {
-  return obj && 
-    validatePath(obj.path) && 
+  return obj &&
+    validatePath(obj.path) &&
     typeof obj.message === 'string';
 }
 
 export function isPushPullOptions(obj: any): obj is PushPullOptions {
-  return obj && 
-    validatePath(obj.path) && 
+  return obj &&
+    validatePath(obj.path) &&
     typeof obj.branch === 'string';
 }
 
 export function isBranchOptions(obj: any): obj is BranchOptions {
-  return obj && 
-    validatePath(obj.path) && 
+  return obj &&
+    validatePath(obj.path) &&
     typeof obj.name === 'string';
 }
 
 export function isCheckoutOptions(obj: any): obj is CheckoutOptions {
-  return obj && 
-    validatePath(obj.path) && 
+  return obj &&
+    validatePath(obj.path) &&
     typeof obj.target === 'string';
 }
 
 export function isTagOptions(obj: any): obj is TagOptions {
-  return obj && 
-    validatePath(obj.path) && 
+  return obj &&
+    validatePath(obj.path) &&
     typeof obj.name === 'string';
 }
 
 export function isRemoteOptions(obj: any): obj is RemoteOptions {
-  return obj && 
-    validatePath(obj.path) && 
+  return obj &&
+    validatePath(obj.path) &&
     typeof obj.name === 'string';
 }
 
@@ -211,7 +211,7 @@ export function isBulkActionOptions(obj: any): obj is BulkActionOptions {
 
     switch (action.type) {
       case 'stage':
-        return !action.files || (Array.isArray(action.files) && 
+        return !action.files || (Array.isArray(action.files) &&
           action.files.every((f: any) => typeof f === 'string' && isAbsolutePath(f)));
       case 'commit':
         return typeof action.message === 'string';
